@@ -131,30 +131,39 @@ Common thread: each layer promises to hide something, but its guarantee holds on
 
 **Threads, locks and shared memory - Is a "critical section" really atomic?**
 
-Textbooks introduce concurrency with threads, mutual-exclusion locks and the critical-section pattern, presenting a lock as the guarantee that only one thread executes the protected code at a time, and treating a concurrent program as an interleaving of the statements written in the source. This account rests on unstated assumptions: (1) the program order written by the programmer is the order observed by other threads, that is, memory operations behave as if there were a single global order (sequential consistency); (2) a lock protects every access to the data it guards, including reads, compiler-generated accesses and accesses made through aliases; (3) locks compose, so that independently correct critical sections combine into a correct program regardless of the order in which locks are acquired; and (4) the cost of synchronisation is negligible compared with the work inside the critical section. Critically analyse these assumptions and support your analysis with concrete cases (for example: store buffers and weak memory models on ARM and POWER that require explicit fences, so that a textbook Dekker or Peterson algorithm fails without them; double-checked locking that is broken without `volatile`; a spin flag that the compiler hoists out of the loop because it is not declared atomic; deadlock caused by lock-order inversion, and priority inversion in a real-time system; false sharing that makes a "parallel" program slower than its sequential version; a lock-free queue that is correct only under a memory model the language does not actually guarantee).
+(1) the program order written by the programmer is the order observed by other threads, that is, memory operations behave as if there were a single global order (sequential consistency); 
+(2) a lock protects every access to the data it guards, including reads, compiler-generated accesses and accesses made through aliases;
+(3) locks compose, so that independently correct critical sections combine into a correct program regardless of the order in which locks are acquired;
+(4) the cost of synchronisation is negligible compared with the work inside the critical section.
 
-Finally, discuss whether a "correct concurrent program" can even be defined without first fixing a memory model, and whether the move towards message passing, actors and ownership types removes the problem or merely relocates it.
+
 
 ## Question 14
 
 **File systems and durability - When a write returns, is the data really saved?**
 
-Textbooks describe a file as a named byte stream and `read`/`write` as operations on persistent storage, so that a successful write is understood to mean that the data has been stored. This rests on unstated assumptions: (1) a write reaches stable storage before the call returns; (2) the data and the metadata of an update become visible atomically, so that a crash leaves either the old state or the new one; (3) `rename` is atomic and `fsync` orders every write issued before it, including directory entries; and (4) the storage device tells the truth - a drive that reports a completed flush has actually persisted the data. Critically analyse these assumptions with concrete cases (for example: the page cache and writeback meaning that a write followed by a power cut loses the data; ext4 delayed allocation producing a zero-length file after a crash even though the write "succeeded"; torn 512-byte sectors on 4K-native drives; the difference between `fsync` and `fdatasync`, and the need to fsync the directory after a `rename`; SSD and RAID controllers with volatile write-back caches that ignore or lie about flushes; NFS close-to-open consistency; the PostgreSQL "fsyncgate" incident, in which fsync errors were ignored and the system continued as if the data were durable).
+(1) a write reaches stable storage before the call returns; 
+(2) the data and the metadata of an update become visible atomically, so that a crash leaves either the old state or the new one;
+(3) `rename` is atomic and `fsync` orders every write issued before it, including directory entries; 
+(4) the storage device tells the truth - a drive that reports a completed flush has actually persisted the data. 
 
-Finally, discuss what "durable" can mean when every layer - application, operating system, controller and drive - has its own cache, and whether ordinary applications should be expected to reason about crash consistency at all.
+
 
 ## Question 15
 
 **Testing, verification and "correct" software - Does passing the tests mean the program is correct?**
 
-Textbooks present testing as the practical way to establish that a program works, with coverage criteria and a passing test suite treated as evidence of quality. This rests on unstated assumptions: (1) the test suite specifies the intended behaviour completely, so that any behaviour not tested is not required; (2) passing the tests implies the absence of bugs, or at least that the remaining bugs do not matter; (3) the oracle is correct - the expected outputs are themselves right; and (4) tests are deterministic, so that a suite which passes today will pass tomorrow on another machine. Critically analyse these assumptions with concrete cases (for example: Dijkstra's observation that testing can show the presence of bugs but never their absence; a suite with 100% line coverage and no assertions; mutation testing revealing that a "complete" suite kills only a small fraction of deliberately injected faults; the oracle problem in compilers and machine learning, where the expected output cannot be written down by hand; flaky tests and concurrency bugs that appear once a year; a test that passes only because it mocks the very component that is broken).
+(1) The test suite specifies the intended behaviour completely, so that any behaviour not tested is not required; 
+(2) passing the tests implies the absence of bugs, or at least that the remaining bugs do not matter; 
+(3) the oracle is correct - the expected outputs are themselves right; 
+(4) tests are deterministic, so that a suite which passes today will pass tomorrow on another machine. 
 
-Finally, discuss whether the quality signal that industry actually relies on is "the tests pass" or "few defects reach production", and what an honest engineering claim about correctness would look like.
 
 ## Question 16
 
 **Memory safety and security - Is a correct program also a safe program?**
 
-Textbooks separate correctness (does the program do what it is specified to do) from security (does it resist an adversary), and treat buffer overflows and use-after-free as bugs that careful programmers avoid. This rests on unstated assumptions: (1) a program that produces the right output for valid inputs is correct, and invalid inputs are somebody else's problem; (2) memory errors affect only the erroneous program, and the worst outcome is a crash; (3) safety can be added at the boundary, by validating input and putting a firewall in front of the service; and (4) memory-safe languages are too slow for real systems, so unsafe languages are a necessary price. Critically analyse these assumptions with concrete cases (for example: Heartbleed, where one missing bounds check in a heartbeat handler leaked private keys from otherwise correct servers; the Morris worm and stack smashing; use-after-free and type confusion in browsers; Spectre and Meltdown, where architecturally correct execution leaks secrets through microarchitectural side channels; Rowhammer flipping bits in memory that the program never wrote; the observation that most serious vulnerabilities in large codebases are memory-safety issues, which is why memory-safe languages and C++ profiles exist).
-
-Finally, discuss whether "safe by construction" - memory-safe languages, or formally verified kernels such as seL4 - can scale to the systems we actually build, and who should bear the cost of the unsafe code that remains.
+(1) a program that produces the right output for valid inputs is correct, and invalid inputs are somebody else's problem; 
+(2) memory errors affect only the erroneous program, and the worst outcome is a crash; 
+(3) safety can be added at the boundary, by validating input and putting a firewall in front of the service；
+(4) memory-safe languages are too slow for real systems, so unsafe languages are a necessary price.
