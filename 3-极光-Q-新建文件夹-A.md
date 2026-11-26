@@ -64,7 +64,7 @@ Remote API call or big-integer mod — effectiveness: not a pencil-and-paper pri
 
  Big-O asymptotic notation serves as the dominant analytical framework within algorithm textbooks for evaluating algorithm time complexity, which abstracts away constant-factor overheads and low-order terms and only focuses on theoretical growth behaviour under sufficiently large-size input. While this abstraction brings convenience for theoretical comparison among different algorithms, it ignores numerous practical factors that dominate actual program runtime. Discuss multiple important reasons why depending solely on Big-O complexity will produce incorrect judgements for real-world application performance, and give representative practical examples to back up your analysis.
  
-Big-O compares growth rates, not runtime. It discards constants and lower-order terms that dominate at realistic sizes, assumes uniform-cost operations on a RAM machine, and ignores caches, memory traffic, I/O, and parallelism. It also compares worst cases, while real inputs are often small, structured, or adversarial in a different way.
+**Ans:** Big-O compares growth rates, not runtime. It discards constants and lower-order terms that dominate at realistic sizes, assumes uniform-cost operations on a RAM machine, and ignores caches, memory traffic, I/O, and parallelism. It also compares worst cases, while real inputs are often small, structured, or adversarial in a different way.
 
 Examples:
 3n² + 5n + 42 is “O(n²)”, but at n = 10 the constant term matters; insertion sort beats merge sort on small arrays.
