@@ -53,17 +53,48 @@ different under NVFPX and INTX. Some even does not support INTX at all.
 
 Textbooks formalise algorithms relying on Knuth's five essential properties: input, output, definiteness, finiteness and effectiveness, meanwhile establishing a clear conceptual boundary between abstract algorithm descriptions and concrete executable computer programs. Many textbook discussions implicitly assume that these five properties can be fully satisfied in real-world software. Critically analyse the mismatch existing between this ideal formal model and practical software development practice, and provide multiple concrete real-world examples to demonstrate how deployed software systems may violate one or more of those idealised properties presented in course materials.
 
+**Ans:** The formal model assumes a closed world: a fixed input domain, a complete specification, guaranteed termination, and primitive steps whose cost can be ignored. Software lives in an open world: inputs are arbitrary, specifications evolve, services are expected to run indefinitely, and “primitive” operations are library or hardware calls that can fail. The boundary is therefore normative rather than descriptive; engineering adds validation, timeouts, and monitoring to approximate the ideal.
+
+Examples, each violating a specific property:
+Web server / OS event loop — finiteness: runs forever by design.
+Parser fed malformed JSON — output/definiteness: crashes or behaves in an unspecified way.
+Floating-point or parallel code — definiteness: same input can produce different results.
+Remote API call or big-integer mod — effectiveness: not a pencil-and-paper primitive, and may fail or take unbounded time.
 ## Question 6
 
-Big-O asymptotic notation serves as the dominant analytical framework within algorithm textbooks for evaluating algorithm time complexity, which abstracts away constant-factor overheads and low-order terms and only focuses on theoretical growth behaviour under sufficiently large-size input. While this abstraction brings convenience for theoretical comparison among different algorithms, it ignores numerous practical factors that dominate actual program runtime. Discuss multiple important reasons why depending solely on Big-O complexity will produce incorrect judgements for real-world application performance, and give representative practical examples to back up your analysis.
+ Big-O asymptotic notation serves as the dominant analytical framework within algorithm textbooks for evaluating algorithm time complexity, which abstracts away constant-factor overheads and low-order terms and only focuses on theoretical growth behaviour under sufficiently large-size input. While this abstraction brings convenience for theoretical comparison among different algorithms, it ignores numerous practical factors that dominate actual program runtime. Discuss multiple important reasons why depending solely on Big-O complexity will produce incorrect judgements for real-world application performance, and give representative practical examples to back up your analysis.
+ 
+Big-O compares growth rates, not runtime. It discards constants and lower-order terms that dominate at realistic sizes, assumes uniform-cost operations on a RAM machine, and ignores caches, memory traffic, I/O, and parallelism. It also compares worst cases, while real inputs are often small, structured, or adversarial in a different way.
 
+Examples:
+3n² + 5n + 42 is “O(n²)”, but at n = 10 the constant term matters; insertion sort beats merge sort on small arrays.
+Binary search is O(log n) but can lose to a linear scan because of cache misses.
+Quicksort is O(n²) worst case but usually fastest; hash tables are O(1) average but O(n) under collisions.
+Python str += in a loop is O(n²), and big-integer arithmetic is not constant-time.
 ## Question 7
 
 The greedy design paradigm taught in algorithm courses builds upon repeatedly making locally optimal decisions at every step with the expectation of finally obtaining a globally optimal solution. Textbook examples such as canonical coin-change problems show cases where greedy strategies succeed. However, greedy algorithms cannot guarantee global optimality for general-purpose problems. Elaborate on the core preconditions that must hold if a greedy algorithm is to compute globally optimal results, and describe several realistic problem scenarios where local greedy choices lead to sub-optimal outcomes even though valid optimal solutions exist for the given problem.
 
+**Ans:** Greedy is optimal only when the greedy-choice property holds (some optimal solution contains the first local choice), optimal substructure holds, and the problem has enough structure — a matroid, or a canonical coin system — to make the choice safe. This is normally proved by an exchange argument; without such a proof, “locally best” is only a heuristic.
+
+Scenarios:
+Coins {1, 3, 4}, amount 6: greedy takes 4 + 1 + 1, but 3 + 3 is optimal.
+0/1 knapsack, capacity 10, items (6, 60), (5, 50), (5, 50): greedy takes 60, optimum is 100.
+Weighted interval scheduling: earliest-finish greedy picks a short low-value job and blocks a long high-value one.
+
 ## Question 8
 
 The textbook version of Dijkstra's algorithm is presented as an efficient classic solution for single-source shortest-path problems over graphs, widely applied to abstract graph examples as well as introductory network-routing illustrations. This standard algorithm is derived under a set of unstated built-in prerequisites. Identify these hidden assumptions behind the textbook implementation of Dijkstra's algorithm, and conduct an in-depth discussion on realistic network and graph scenarios in which those assumptions break down, causing the standard Dijkstra procedure to produce wrong results or become completely inapplicable.
+
+**Ans:** The standard implementation assumes non-negative, static, additive, scalar edge weights on a finite, fully known graph, with one source and a centralized priority queue; these assumptions justify finalizing a vertex when it is extracted. It also assumes exact, comparable weights and that “shortest” means minimizing a sum.
+
+Where they break:
+Negative edges — finalization is wrong: A→B = 1, A→C = 2, C→B = −2 gives B = 1 instead of 0.
+Negative cycles — “shortest path” is undefined, as in currency arbitrage.
+Dynamic topology — distances go stale; OSPF reconvergence can cause transient loops and blackholes.
+Policy or bandwidth metrics — costs are not additive; BGP uses policy, and bandwidth-constrained routing is NP-hard, so Dijkstra is inapplicable.
+Wireless or time-dependent networks — weights fluctuate or depend on departure time.
+Very large graphs — the centralized computation is impractical; hierarchy or A* is needed.
 
 ## Question 9
 
